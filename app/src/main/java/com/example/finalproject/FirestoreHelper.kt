@@ -47,23 +47,25 @@ class FirestoreHelper (private val context: Context) {
                 if (!documents.isEmpty) {
                     // Course Type already exists
                     Toast.makeText(context, "Course Type already exists", Toast.LENGTH_SHORT).show()
+                }else{
+                    try {
+                        // Add course details to Cloud Firestore
+                        val courseCollection = firestore.collection("Courses")
+                        val courseCloud = hashMapOf(
+                            "id" to courseId,
+                            "type" to type,
+                            "description" to description
+                        )
+                        courseCollection.document(courseId).set(courseCloud)
+                        // Added Successfully
+                        Toast.makeText(context, "Course added successfully", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Log.e("addCourse", "Error inserting data", e)
+                    }
                 }
-                return@addOnCompleteListener
             }else{
-                try {
-                    // Add course details to Cloud Firestore
-                    val courseCollection = firestore.collection("Courses")
-                    val courseCloud = hashMapOf(
-                        "id" to courseId,
-                        "type" to type,
-                        "description" to description
-                    )
-                    courseCollection.document(courseId).set(courseCloud)
-                    // Added Successfully
-                    Toast.makeText(context, "Course added successfully", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Log.e("addCourse", "Error inserting data", e)
-                }
+                Toast.makeText(context, "Failed to check course type: ${task.exception?.message}",
+                    Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -464,9 +466,11 @@ class FirestoreHelper (private val context: Context) {
             if (calendar.get(Calendar.DAY_OF_WEEK) in classDays) {
                 val sessionDate = dateFormat.format(calendar.time)
                 val dayOfWeek = dayFormat.format(calendar.time)
+                val  sessionId = "$classId-session-$sessionNumber"
 
                 val session = hashMapOf(
-                    "sessionId" to "$classId-session-$sessionNumber",
+                    "sessionId" to sessionId,
+                    "title" to "",
                     "dateNumber" to dateNumber,
                     "sessionNumber" to sessionNumber,
                     "date" to sessionDate,
@@ -475,7 +479,7 @@ class FirestoreHelper (private val context: Context) {
                 )
 
                 val paddedNumber = String.format("%02d", dateNumber)
-                timetableCollection.document("session-$paddedNumber").set(session)
+                timetableCollection.document(sessionId).set(session)
                 sessionNumber++
                 dateNumber++
                 sessionsCreated++
@@ -483,6 +487,24 @@ class FirestoreHelper (private val context: Context) {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
     }
+    // Update Timetable Title
+    fun updateTimetableTitle(classId: String, courseId: String, sessionId: String, newTitle: String) {
+        val timetableRef = firestore.collection("Courses")
+            .document(courseId)
+            .collection("Classes")
+            .document(classId)
+            .collection("Timetable")
+            .document(sessionId)
+
+        timetableRef.update("title", newTitle)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Timetable title updated successfully.")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error updating timetable title", e)
+            }
+    }
+
     // Update Timetable Status
     fun updateTimetableStatus(courseId: String, classId: String) {
         val firestore = FirebaseFirestore.getInstance()
@@ -538,9 +560,10 @@ class FirestoreHelper (private val context: Context) {
                     val sessionNumber = document.getLong("sessionNumber")?.toInt()?.toString() ?: ""
                     val date = document.getString("date") ?: ""
                     val dayOfWeek = document.getString("dayOfWeek") ?: ""
+                    val title = document.getString("title") ?: ""
                     val status = document.getString("status") ?: ""
                     val timetables = Timetable(sessionId, dateNumber, sessionNumber,
-                        date, dayOfWeek, status)
+                        date, dayOfWeek, title, status)
                     timetableList.add(timetables)
                 }
                 firestoreCallback(timetableList)

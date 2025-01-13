@@ -24,6 +24,9 @@
         android:theme="@style/Theme.FinalProject"
         tools:targetApi="31">
         <activity
+            android:name=".timetables.AddTitleMenu"
+            android:exported="false" />
+        <activity
             android:name=".timetables.TimetableMenu"
             android:exported="false" />
         <activity

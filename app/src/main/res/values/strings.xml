@@ -47,6 +47,7 @@
     </string-array>
     <string-array name="class_length">
         <item>---Choose Class Length---</item>
+        <item>3 Days</item>
         <item>15 Days</item>
         <item>20 Days</item>
         <item>25 Days</item>

@@ -64,7 +64,7 @@ class ClassAdapter (private val context: Context, private val classList: ArrayLi
             // Show Timetable Button
             showTimetableButton.setOnClickListener {
                 val intent = Intent(holder.itemView.context, TimetableMenu::class.java)
-                intent.putExtra("id", currentClass.id)
+                intent.putExtra("classId", currentClass.id)
                 intent.putExtra("courseId", currentClass.courseId)
                 holder.itemView.context.startActivity(intent)
                 dialog.dismiss()

@@ -17,6 +17,7 @@ class TimetableMenu : AppCompatActivity() {
     private lateinit var adapter: TimetableAdapter
     private val timetableList = ArrayList<Timetable>()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,7 +54,7 @@ class TimetableMenu : AppCompatActivity() {
     // Update timetable status when the activity starts
     override fun onStart(){
         super.onStart()
-        val classId = intent.getStringExtra("id") ?: ""
+        val classId = intent.getStringExtra("classId") ?: ""
         val courseId = intent.getStringExtra("courseId") ?: ""
         val fd = FirestoreHelper(this)
         fd.updateTimetableStatus(courseId, classId)
@@ -61,7 +62,7 @@ class TimetableMenu : AppCompatActivity() {
     // Update RecyclerView when the activity is resumed
     override fun onResume() {
         super.onResume()
-        val classId = intent.getStringExtra("id") ?: ""
+        val classId = intent.getStringExtra("classId") ?: ""
         val courseId = intent.getStringExtra("courseId") ?: ""
         val fd = FirestoreHelper(this)
         fd.getTimetableByClassesId(classId, courseId) { timetable ->

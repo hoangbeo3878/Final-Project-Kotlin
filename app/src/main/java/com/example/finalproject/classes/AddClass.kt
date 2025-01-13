@@ -18,6 +18,7 @@ import com.example.finalproject.FirestoreHelper
 import java.util.Calendar
 import com.example.finalproject.R
 import com.example.finalproject.courses.CourseMenu
+import com.example.finalproject.timetables.AddTitleMenu
 import com.example.finalproject.users.Users
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.auth.User
@@ -116,9 +117,11 @@ class AddClass : AppCompatActivity() {
                         val fd = FirestoreHelper(this)
                         fd.addClass(id, name, rank, quantity, price, date,
                             time, length, startDate, courseId, teacherId)
-                        // Clear fields
-                        classTimeSpinner.setSelection(0)
-                        classStartDate.text.clear()
+                        // Move to Add Title
+                        val intent = Intent(this, AddTitleMenu::class.java)
+                        intent.putExtra("classId", id)
+                        intent.putExtra("courseId", courseId)
+                        startActivity(intent)
                     }else{
                         Toast.makeText(this, "Teacher already has a class on this time and date",
                             Toast.LENGTH_SHORT).show()

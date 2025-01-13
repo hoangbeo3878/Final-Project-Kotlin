@@ -6,5 +6,6 @@ data class Timetable (
     val sessionNumber: String,
     val date: String,
     val dayOfWeek: String,
+    var title: String,
     val status: String
 )
