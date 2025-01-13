@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="6dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/gradient_card_background">
+
+
+        <TextView
+            android:id="@+id/dateNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date 1"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center"
+            android:textSize="30sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="0dp"
+            android:padding="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Session 1: Introduction to Basic Ietls Skills"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/date_dayOfWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: 26/12/2024 - Thursday"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Finished"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

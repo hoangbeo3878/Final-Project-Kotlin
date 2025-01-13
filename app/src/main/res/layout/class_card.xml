@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="8dp"
+    android:backgroundTint="#6200EE">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/gradient_card_background">
+
+        <!-- Name (Most prominent text) -->
+        <TextView
+            android:id="@+id/className"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Class: AE-B-181224"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Class Rank -->
+        <TextView
+            android:id="@+id/classTeacher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Teacher: Samuel Jackson"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Quantity -->
+        <TextView
+            android:id="@+id/classQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Students: 20 Participants"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

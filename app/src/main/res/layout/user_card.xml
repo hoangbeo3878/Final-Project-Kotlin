@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="6dp">
+
+    <!-- Main Layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gradient_card_background"
+        android:padding="16dp">
+        <!-- Circular ImageView -->
+        <!-- Role -->
+
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/circular_image_background"
+            android:contentDescription="Profile Image"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_user"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.763" />
+
+        <TextView
+            android:id="@+id/role_details"
+            android:layout_width="295dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Teacher"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <!-- Phone Number -->
+        <TextView
+            android:id="@+id/phone_number_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="15dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Phone Number: 0912345678"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/email_details" />
+        <!-- Email -->
+        <TextView
+            android:id="@+id/email_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="15dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="Email: hoangnguyen1822003@gmail.com"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/name_details" />
+        <!-- Address -->
+        <TextView
+            android:id="@+id/address_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="15dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Address: 106/3/32, 51 street, Go Vap district, Ho Chi Minh City"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/phone_number_details" />
+        <!-- Name -->
+        <TextView
+            android:id="@+id/name_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="15dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Name: Samuel Jackson"
+            android:textColor="@android:color/white"
+            android:textSize="15dp"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/role_details" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

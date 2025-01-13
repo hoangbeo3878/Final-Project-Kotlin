@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">Final Project</string>
+    <string name="title_activity_login_admin">LoginAdmin</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+
+    <string-array name="class_ranks">
+        <item>---Choose Class Rank---</item>
+        <item>A rank</item>
+        <item>B rank</item>
+        <item>C rank</item>
+        <item>D rank</item>
+    </string-array>
+    <string-array name="class_quantity">
+        <item>---Choose Class Quantity---</item>
+        <item>10 participants</item>
+        <item>15 participants</item>
+        <item>20 participants</item>
+        <item>25 participants</item>
+    </string-array>
+    <string-array name="class_price">
+        <item>---Choose Class Price---</item>
+        <item>$10</item>
+        <item>$15</item>
+        <item>$20</item>
+        <item>$25</item>
+        <item>$30</item>
+    </string-array>
+    <string-array name="class_time">
+        <item>---Choose Class Time---</item>
+        <item>7:30 AM - 9:30 AM</item>
+        <item>9:45 AM - 11:45 AM</item>
+        <item>5:30 PM - 7:30 PM</item>
+        <item>7:45 PM - 9:45 PM</item>
+    </string-array>
+    <string-array name="class_date">
+        <item>---Choose Class Date---</item>
+        <item>Monday - Wednesday - Friday</item>
+        <item>Tuesday - Thursday - Saturday</item>
+        <item>Saturday - Sunday</item>
+    </string-array>
+    <string-array name="class_length">
+        <item>---Choose Class Length---</item>
+        <item>15 Days</item>
+        <item>20 Days</item>
+        <item>25 Days</item>
+        <item>30 Days</item>
+    </string-array>
+</resources>
