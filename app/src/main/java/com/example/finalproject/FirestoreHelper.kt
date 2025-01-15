@@ -36,12 +36,14 @@ class FirestoreHelper (private val context: Context) {
             }
     }
     // Add Course
-    fun addCourse(courseId: String, type: String, description: String) {
+    fun addCourse(courseId: String, type: String, description: String,callback: FirestoreCallback) {
+        callback.onLoading(true)
         // Check if Course Type already exists
         val courseCollection = firestore
             .collection("Courses")
             .whereEqualTo("type", type)
         courseCollection.get().addOnCompleteListener { task ->
+            callback.onLoading(false)
             if (task.isSuccessful) {
                 val documents = task.result
                 if (!documents.isEmpty) {
@@ -57,8 +59,14 @@ class FirestoreHelper (private val context: Context) {
                             "description" to description
                         )
                         courseCollection.document(courseId).set(courseCloud)
-                        // Added Successfully
-                        Toast.makeText(context, "Course added successfully", Toast.LENGTH_SHORT).show()
+                            .addOnSuccessListener {
+                                // Added Successfully
+                                callback.onSuccess()
+                                Toast.makeText(context, "Course added successfully", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                callback.onFailure(e.message ?: "Unknown error")
+                            }
                     } catch (e: Exception) {
                         Log.e("addCourse", "Error inserting data", e)
                     }
@@ -68,6 +76,11 @@ class FirestoreHelper (private val context: Context) {
                     Toast.LENGTH_SHORT).show()
             }
         }
+    }
+    interface FirestoreCallback {
+        fun onLoading(isLoading: Boolean)
+        fun onSuccess()
+        fun onFailure(message: String)
     }
     // Update Course
     fun updateCourse(courseId: String, type: String, description: String) {
