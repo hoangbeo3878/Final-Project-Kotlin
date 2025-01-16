@@ -38,7 +38,7 @@ class EditCourse : AppCompatActivity() {
         }
         getIntentData()
     }
-    // Getting Intent Data func
+    // Getting Intent Data
     private fun getIntentData(){
         //Getting Data from Intent
         val id = intent.getStringExtra("id")

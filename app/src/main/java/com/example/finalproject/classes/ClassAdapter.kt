@@ -49,13 +49,20 @@ class ClassAdapter (private val context: Context, private val classList: ArrayLi
             val showTimetableButton = dialog.findViewById<TextView>(R.id.show_button)
             // Edit Button
             editButton.setOnClickListener {
-//            val intent = Intent(holder.itemView.context, EditClass::class.java)
-//            intent.putExtra("id", currentClass.id)
-//            intent.putExtra("name", currentClass.name)
-//            intent.putExtra("teacherId", currentClass.teacherId)
-//            intent.putExtra("quantity", currentClass.quantity)
-//            holder.itemView.context.startActivity(intent)
-//            dialog.dismiss()
+                val intent = Intent(holder.itemView.context, EditClass::class.java)
+                intent.putExtra("classId", currentClass.id)
+                intent.putExtra("className", currentClass.name)
+                intent.putExtra("classQuantity", currentClass.quantity)
+                intent.putExtra("classDay", currentClass.date)
+                intent.putExtra("classTime", currentClass.time)
+                intent.putExtra("classRank", currentClass.rank)
+                intent.putExtra("classStartDate", currentClass.startDate)
+                intent.putExtra("classPrice", currentClass.price)
+                intent.putExtra("classLength", currentClass.length)
+                intent.putExtra("teacherId", currentClass.teacherId)
+                intent.putExtra("courseId", currentClass.courseId)
+                holder.itemView.context.startActivity(intent)
+                dialog.dismiss()
             }
             // Delete Button
             deleteButton.setOnClickListener {

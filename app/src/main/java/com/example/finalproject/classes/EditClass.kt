@@ -13,27 +13,28 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.finalproject.DatabaseHelper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.finalproject.FirestoreHelper
-import java.util.Calendar
 import com.example.finalproject.R
 import com.example.finalproject.courses.CourseMenu
 import com.example.finalproject.timetables.AddTitleMenu
-import com.example.finalproject.users.Users
+import com.example.finalproject.timetables.TimetableMenu
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
 
-class AddClass : AppCompatActivity() {
+class EditClass : AppCompatActivity() {
     private val teacherIds = mutableListOf<String>()
     private val classCount = mutableMapOf<String, MutableMap<String, Int>>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_add_class)
+        setContentView(R.layout.activity_edit_class)
+        // Set up Intent Data
+        getIntentData()
         // Initialize views
         val classRankSpinner = findViewById<Spinner>(R.id.classRankSpinner)
         val classQuantitySpinner = findViewById<Spinner>(R.id.classQuantitySpinner)
@@ -49,7 +50,9 @@ class AddClass : AppCompatActivity() {
         setupTeacherSpinner()
         // Back button click listener
         backButton.setOnClickListener {
-            val intent = Intent(this, CourseMenu::class.java)
+            val courseId = intent.getStringExtra("courseId") ?: ""
+            val intent = Intent(this, ClassMenu::class.java)
+            intent.putExtra("courseId", courseId)
             startActivity(intent)
         }
         // Clear start date field when classDateSpinner value changes
@@ -111,13 +114,9 @@ class AddClass : AppCompatActivity() {
                         }
 
                         val fd = FirestoreHelper(this)
-                        fd.addClass(id, name, rank, quantity, price, date,
+                        fd.editClass(id, name, rank, quantity, price, date,
                             time, length, startDate, courseId, teacherId)
-                        // Move to Add Title
-                        val intent = Intent(this, AddTitleMenu::class.java)
-                        intent.putExtra("classId", id)
-                        intent.putExtra("courseId", courseId)
-                        startActivity(intent)
+
                     }else{
                         Toast.makeText(this, "Teacher already has a class on this time and date",
                             Toast.LENGTH_SHORT).show()
@@ -128,7 +127,61 @@ class AddClass : AppCompatActivity() {
                 Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+    // Getting Intent Data
+    private fun getIntentData() {
+        // Getting Data from Intent
+        val classId = intent.getStringExtra("classId")
+        val className = intent.getStringExtra("className")
+        val classQuantity = intent.getStringExtra("classQuantity")
+        val classDay = intent.getStringExtra("classDay")
+        val classTime = intent.getStringExtra("classTime")
+        val classRank = intent.getStringExtra("classRank")
+        val classStartDate = intent.getStringExtra("classStartDate")
+        val classPrice = intent.getStringExtra("classPrice")
+        val classLength = intent.getStringExtra("classLength")
+        val teacherId = intent.getStringExtra("teacherId")
+        val courseId = intent.getStringExtra("courseId")
 
+        // Setting Intent Data
+        val classRankSpinner = findViewById<Spinner>(R.id.classRankSpinner)
+        val classQuantitySpinner = findViewById<Spinner>(R.id.classQuantitySpinner)
+        val classPriceSpinner = findViewById<Spinner>(R.id.classPriceSpinner)
+        val classTimeSpinner = findViewById<Spinner>(R.id.classTimeSpinner)
+        val classDateSpinner = findViewById<Spinner>(R.id.classDateSpinner)
+        val classTeacherSpinner = findViewById<Spinner>(R.id.classTeacherSpinner)
+        val classStartDateEditText = findViewById<EditText>(R.id.classStartDate)
+        val classLengthSpinner = findViewById<Spinner>(R.id.classLengthSpinner)
+
+        // Set data to the views
+        classStartDateEditText.setText(classStartDate)
+
+        // Set Spinner selections based on Intent data
+        setSpinnerSelection(classRankSpinner, classRank)
+        setSpinnerSelection(classQuantitySpinner, classQuantity)
+        setSpinnerSelection(classPriceSpinner, classPrice)
+        setSpinnerSelection(classTimeSpinner, classTime)
+        setSpinnerSelection(classDateSpinner, classDay)
+        setSpinnerSelection(classLengthSpinner, classLength)
+
+        // Select teacher in spinner if available
+        val teacherIndex = teacherIds.indexOf(teacherId)
+        if (teacherIndex != -1) {
+            classTeacherSpinner.setSelection(teacherIndex + 1) // Offset by 1 due to default item
+        }
+    }
+
+    // Helper function to set Spinner selection based on a value
+    private fun setSpinnerSelection(spinner: Spinner, value: String?) {
+        val adapter = spinner.adapter
+        if (adapter != null) {
+            for (i in 0 until adapter.count) {
+                if (adapter.getItem(i).toString() == value) {
+                    spinner.setSelection(i)
+                    return
+                }
+            }
+        }
     }
     // Set Up Teacher Name into Spinner
     private fun setupTeacherSpinner() {

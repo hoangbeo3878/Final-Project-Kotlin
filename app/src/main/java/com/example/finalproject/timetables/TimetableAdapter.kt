@@ -24,8 +24,8 @@ class TimetableAdapter (private val timetableList: ArrayList<Timetable>)
 
     override fun onBindViewHolder(holder: TimetableViewHolder, position: Int) {
         val currentItem = timetableList[position]
-        holder.dateNumber.text = "Date: " + currentItem.dateNumber
-        holder.session.text = "Session: " + currentItem.sessionNumber + " - " + currentItem.title
+        holder.dateNumber.text = "Date " + currentItem.dateNumber
+        holder.session.text = "Session " + currentItem.sessionNumber + " - " + currentItem.title
         holder.date_dayOfWeek.text = "Time: " + currentItem.date + " - " + currentItem.dayOfWeek
         holder.status.text = "Status: " + currentItem.status
     }

@@ -28,7 +28,7 @@ class AddCourse : AppCompatActivity() {
         val add_button = findViewById<Button>(R.id.addCourseButton)
 
         val progressDialog = ProgressDialog(this).apply {
-            setMessage("Adding course, please wait...")
+            setMessage("Adding Course, please wait...")
             setCancelable(false)
         }
 
@@ -46,7 +46,8 @@ class AddCourse : AppCompatActivity() {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
             } else {
                 val fd = FirestoreHelper(this)
-                fd.addCourse(courseId, courseType, courseDescription, object : FirestoreHelper.FirestoreCallback {
+                fd.addCourse(courseId, courseType, courseDescription,
+                    object : FirestoreHelper.FirestoreCallback {
                     override fun onLoading(isLoading: Boolean) {
                         if (isLoading) progressDialog.show() else progressDialog.dismiss()
                     }

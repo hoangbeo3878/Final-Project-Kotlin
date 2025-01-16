@@ -1,6 +1,7 @@
 package com.example.finalproject.users
 
 import android.Manifest
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -38,6 +39,11 @@ class AddTeacher : AppCompatActivity() {
         val teacherAddress = findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.teacher_address)
         val teacherPhoneNumber = findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.teacher_phone_number)
         profileImageView = findViewById(R.id.profile_image)
+        // Progress Dialog
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("Adding Teacher, please wait...")
+            setCancelable(false)
+        }
         // Back Button
         backButton.setOnClickListener {
             val intent = Intent(this, UserMenu::class.java)
@@ -67,14 +73,24 @@ class AddTeacher : AppCompatActivity() {
                 val userId = "TEA-" + UUID.randomUUID().toString()
                 val imagePath = getRealPathFromURI(imageUri)
                 if (imagePath != null) {
-                    val fb = FirestoreHelper(this)
-                    fb.addTeacher(userId,"Teacher", name, email, phone, address, imagePath)
-                    // Clear fields after saving
-                    teacherName.text?.clear()
-                    teacherEmail.text?.clear()
-                    teacherAddress.text?.clear()
-                    teacherPhoneNumber.text?.clear()
-                    profileImageView.setImageResource(R.drawable.ic_user)
+                    val fd = FirestoreHelper(this)
+                    fd.addTeacher(userId,"Teacher", name, email, phone,
+                        address, imagePath, object : FirestoreHelper.FirestoreCallback {
+                            override fun onLoading(isLoading: Boolean) {
+                                if (isLoading) progressDialog.show() else progressDialog.dismiss()
+                            }
+                            override fun onSuccess() {
+                                // Clear fields after saving
+                                teacherName.text?.clear()
+                                teacherEmail.text?.clear()
+                                teacherAddress.text?.clear()
+                                teacherPhoneNumber.text?.clear()
+                                profileImageView.setImageResource(R.drawable.ic_user)
+                            }
+                            override fun onFailure(message: String) {
+                                Toast.makeText(this@AddTeacher, "Error: $message", Toast.LENGTH_SHORT).show()
+                            }
+                        })
                 } else {
                     Toast.makeText(this, "Unable to process the image.", Toast.LENGTH_SHORT).show()
                 }

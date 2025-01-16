@@ -182,7 +182,8 @@ class FirestoreHelper (private val context: Context) {
     }
     // Add Teacher
     fun addTeacher(userId: String, role: String, name: String, email: String,
-                   phone: String, address: String, image: String) {
+                   phone: String, address: String, image: String, callback: FirestoreCallback) {
+        callback.onLoading(true)
         val auth = FirebaseAuth.getInstance()
         val defaultPassword = "456789"
         val firestore = FirebaseFirestore.getInstance()
@@ -207,6 +208,7 @@ class FirestoreHelper (private val context: Context) {
                                     val user = auth.currentUser
                                     user?.sendEmailVerification()
                                         ?.addOnCompleteListener { verificationTask ->
+                                            callback.onLoading(false)
                                             if (verificationTask.isSuccessful) {
                                                 try {
                                                     val teacherCollection = firestore
@@ -224,8 +226,14 @@ class FirestoreHelper (private val context: Context) {
                                                     teacherCollection
                                                         .collection("Details").document(userId)
                                                         .set(teacherCloud)
-                                                    Toast.makeText(context, "Teacher added successfully",
-                                                        Toast.LENGTH_SHORT).show()
+                                                        .addOnSuccessListener {
+                                                            callback.onSuccess()
+                                                            Toast.makeText(context, "Teacher added successfully",
+                                                                Toast.LENGTH_SHORT).show()
+                                                        }
+                                                        .addOnFailureListener { e ->
+                                                            callback.onFailure(e.message ?: "Unknown error")
+                                                        }
                                                 } catch (e: Exception) {
                                                     Toast.makeText(context, "Error adding teacher: ${e.message}",
                                                         Toast.LENGTH_SHORT).show()
@@ -407,7 +415,6 @@ class FirestoreHelper (private val context: Context) {
     fun addClass(classId: String, className: String, rank: String, quantity: String, price: String,
                  date: String, time: String, length: String, startDate: String, courseId: String,
                  teacherId: String) {
-        val firestore = FirebaseFirestore.getInstance()
         try {
             val classCollection = firestore
                 .collection("Courses")
@@ -441,6 +448,38 @@ class FirestoreHelper (private val context: Context) {
         } catch (e: Exception) {
             Toast.makeText(context, "Error adding class and timetable: ${e.message}", Toast.LENGTH_SHORT).show()
             Log.e("addClass", "Error adding class and timetable", e)
+        }
+    }
+    // Edit Class
+    fun editClass(classId: String, className: String, rank: String, quantity: String, price: String,
+                  date: String, time: String, length: String, startDate: String, courseId: String,
+                  teacherId: String) {
+        try {
+            val classCollection = firestore
+                .collection("Courses")
+                .document(courseId)
+                .collection("Classes")
+            val classCloud = hashMapOf(
+                "id" to classId,
+                "name" to className,
+                "rank" to rank,
+                "quantity" to quantity,
+                "price" to price,
+                "date" to date,
+                "time" to time,
+                "length" to length,
+                "startDate" to startDate,
+                "courseId" to courseId,
+                "teacherId" to teacherId
+            )
+            classCollection.document(classId).set(classCloud)
+            Toast.makeText(context, "Class updated successfully", Toast.LENGTH_SHORT).show()
+        }catch (e: Exception) {
+            Toast.makeText(context, "Error updating class: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("editClass", "Error updating class", e)
+        }finally {
+            val intent = Intent(context, CourseMenu::class.java)
+            context.startActivity(intent)
         }
     }
     // Generate Timetable
@@ -517,7 +556,6 @@ class FirestoreHelper (private val context: Context) {
                 Log.e("Firestore", "Error updating timetable title", e)
             }
     }
-
     // Update Timetable Status
     fun updateTimetableStatus(courseId: String, classId: String) {
         val firestore = FirebaseFirestore.getInstance()
