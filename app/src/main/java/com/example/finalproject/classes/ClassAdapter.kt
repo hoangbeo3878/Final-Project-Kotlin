@@ -3,6 +3,7 @@ package com.example.finalproject.classes
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,6 +62,17 @@ class ClassAdapter (private val context: Context, private val classList: ArrayLi
                 intent.putExtra("classLength", currentClass.length)
                 intent.putExtra("teacherId", currentClass.teacherId)
                 intent.putExtra("courseId", currentClass.courseId)
+                Log.d("ClassAdapter", "Class ID: ${currentClass.id}")
+                Log.d("ClassAdapter", "Course ID: ${currentClass.courseId}")
+                Log.d("ClassAdapter", "Teacher ID: ${currentClass.teacherId}")
+                Log.d("ClassAdapter", "Class Name: ${currentClass.name}")
+                Log.d("ClassAdapter", "Class Quantity: ${currentClass.quantity}")
+                Log.d("ClassAdapter", "Class Day: ${currentClass.date}")
+                Log.d("ClassAdapter", "Class Time: ${currentClass.time}")
+                Log.d("ClassAdapter", "Class Rank: ${currentClass.rank}")
+                Log.d("ClassAdapter", "Class Start Date: ${currentClass.startDate}")
+                Log.d("ClassAdapter", "Class Price: ${currentClass.price}")
+                Log.d("ClassAdapter", "Class Length: ${currentClass.length}")
                 holder.itemView.context.startActivity(intent)
                 dialog.dismiss()
             }

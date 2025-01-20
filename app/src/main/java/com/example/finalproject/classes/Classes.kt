@@ -7,8 +7,8 @@ data class Classes (
     val quantity: String,
     val price: String,
     val date: String,
-    val length: String,
     val time: String,
+    val length: String,
     val startDate: String,
     val courseId: String,
     val teacherId: String
