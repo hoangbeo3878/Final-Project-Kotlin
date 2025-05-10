@@ -1,4 +1,4 @@
-package com.example.finalproject.courses
+package com.example.finalproject.type
 
 import android.app.Dialog
 import android.content.Intent
@@ -12,45 +12,39 @@ import com.example.finalproject.FirestoreHelper
 import com.example.finalproject.R
 import com.example.finalproject.classes.AddClass
 import com.example.finalproject.classes.ClassMenu
+import com.example.finalproject.type.EditType
 
-class CourseAdapter (private val courseList: ArrayList<Courses>)
-    : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>()  {
+class TypeAdapter (private val typeList: ArrayList<Types>)
+    : RecyclerView.Adapter<TypeAdapter.CourseViewHolder>()  {
     class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.title)
-        val type: TextView = itemView.findViewById(R.id.course_type)
         val description: TextView = itemView.findViewById(R.id.description)
-        val class_details: TextView = itemView.findViewById(R.id.class_details)
-        val student_details: TextView = itemView.findViewById(R.id.student_details)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.course_card, parent, false)
+            .inflate(R.layout.type_card, parent, false)
         return CourseViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
-        val currentCourse = courseList[position]
+        val currentCourse = typeList[position]
         holder.name.text = currentCourse.name
-        holder.type.text = "Type: " + currentCourse.type
         holder.description.text = currentCourse.description
         holder.itemView.setOnClickListener {
             // Show dialog options
             val context = holder.itemView.context
             val dialog = Dialog(context)
-            dialog.setContentView(R.layout.course_options)
+            dialog.setContentView(R.layout.type_options)
             dialog.setTitle("Choose an Action")
             // Dialog Buttons
             val editButton = dialog.findViewById<TextView>(R.id.edit_button)
             val deleteButton = dialog.findViewById<TextView>(R.id.delete_button)
-            val adClassButton = dialog.findViewById<TextView>(R.id.add_class_button)
-            val showClassesButton = dialog.findViewById<TextView>(R.id.show_classes_button)
             //Edit Button
             editButton.setOnClickListener {
-                val intent = Intent(holder.itemView.context, EditCourse::class.java)
+                val intent = Intent(holder.itemView.context, EditType::class.java)
                 intent.putExtra("id", currentCourse.id)
-                intent.putExtra("title", currentCourse.name)
-                intent.putExtra("type", currentCourse.type)
+                intent.putExtra("name", currentCourse.name)
                 intent.putExtra("description", currentCourse.description)
                 holder.itemView.context.startActivity(intent)
                 dialog.dismiss()
@@ -61,28 +55,12 @@ class CourseAdapter (private val courseList: ArrayList<Courses>)
                 fd.deleteCourse(currentCourse.id)
                 dialog.dismiss()
             }
-            //Add Class Button
-            adClassButton.setOnClickListener {
-                val intent = Intent(holder.itemView.context, AddClass::class.java)
-                intent.putExtra("name", currentCourse.name)
-                intent.putExtra("type", currentCourse.type)
-                intent.putExtra("courseId", currentCourse.id)
-                holder.itemView.context.startActivity(intent)
-                dialog.dismiss()
-            }
-            //Show Classes Button
-            showClassesButton.setOnClickListener {
-                val intent = Intent(holder.itemView.context, ClassMenu::class.java)
-                intent.putExtra("courseId", currentCourse.id)
-                holder.itemView.context.startActivity(intent)
-                dialog.dismiss()
-            }
             dialog.show()
         }
     }
 
     override fun getItemCount(): Int {
-        return courseList.size
+        return typeList.size
     }
 
 }

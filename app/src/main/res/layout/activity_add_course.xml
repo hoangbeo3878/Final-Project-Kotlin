@@ -38,10 +38,19 @@
             android:id="@+id/courseTypeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Course Type"
+            android:hint="Course Name"
             android:textColorHint="@color/black"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Course Type Spinner -->
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/courseTypeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/spinner_background"
+        android:entries="@array/class_ranks"/>
 
     <!-- Course Description Field -->
     <com.google.android.material.textfield.TextInputLayout

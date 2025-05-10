@@ -68,4 +68,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore:24.1.0")
     // Firebase Storage
     implementation ("com.google.firebase:firebase-storage:20.0.0")
+    // Cloudinary
+    implementation ("com.cloudinary:cloudinary-android:2.2.0")
+    implementation ("com.cloudinary:cloudinary-android-core:2.2.0")
+    
 }

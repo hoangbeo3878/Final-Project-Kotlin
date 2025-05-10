@@ -1,4 +1,4 @@
-package com.example.finalproject.courses
+package com.example.finalproject.type
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,35 +7,32 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.finalproject.DatabaseHelper
 import com.example.finalproject.FirestoreHelper
 import com.example.finalproject.R
 
-class EditCourse : AppCompatActivity() {
+class EditType : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_edit_course)
+        setContentView(R.layout.activity_edit_type)
         // Initialize views
-        val courseTypeEditText = findViewById<EditText>(R.id.courseTypeEditText)
-        val courseDescriptionEditText = findViewById<EditText>(R.id.courseDescription)
-        val courseNameEditText = findViewById<EditText>(R.id.courseNameEditText)
+        val courseTypeEditText = findViewById<EditText>(R.id.TypeEditText)
+        val courseDescriptionEditText = findViewById<EditText>(R.id.DescriptionEditText)
         val backButton = findViewById<ImageView>(R.id.backButton)
-        val updateCourseButton = findViewById<Button>(R.id.updateCourseButton)
+        val updateCourseButton = findViewById<Button>(R.id.addTypeButton)
+
         // Back Button
         backButton.setOnClickListener {
-            val intent = Intent(this, CourseMenu::class.java)
+            val intent = Intent(this, TypeMenu::class.java)
             startActivity(intent)
         }
         // Update Button
         updateCourseButton.setOnClickListener {
             val id = intent.getStringExtra("id") ?: ""
-            val name = courseTypeEditText.text.toString()
+            val type = courseTypeEditText.text.toString()
             val description = courseDescriptionEditText.text.toString()
             val fd = FirestoreHelper(this)
-            fd.updateCourse(id, name, description)
+            fd.updateCourse(id, type, description)
         }
         getIntentData()
     }
@@ -43,15 +40,12 @@ class EditCourse : AppCompatActivity() {
     private fun getIntentData(){
         //Getting Data from Intent
         val id = intent.getStringExtra("id")
-        val title = intent.getStringExtra("title")
-        val type = intent.getStringExtra("type")
+        val name = intent.getStringExtra("name")
         val description = intent.getStringExtra("description")
         //Setting Intent Data
-        val courseTypeEditText = findViewById<EditText>(R.id.courseTypeEditText)
-        val courseNameEditText = findViewById<EditText>(R.id.courseNameEditText)
-        val courseDescriptionEditText = findViewById<EditText>(R.id.courseDescription)
-        courseTypeEditText.setText(type)
-        courseNameEditText.setText(title)
+        val courseTypeEditText = findViewById<EditText>(R.id.TypeEditText)
+        val courseDescriptionEditText = findViewById<EditText>(R.id.DescriptionEditText)
+        courseTypeEditText.setText(name)
         courseDescriptionEditText.setText(description)
     }
 }

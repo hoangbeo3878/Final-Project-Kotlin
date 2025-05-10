@@ -9,6 +9,7 @@ import com.example.finalproject.classes.Classes
 import com.example.finalproject.timetables.Timetable
 import com.example.finalproject.courses.CourseMenu
 import com.example.finalproject.courses.Courses
+import com.example.finalproject.type.Types
 import com.example.finalproject.users.UserMenu
 import com.example.finalproject.users.Users
 import com.google.firebase.auth.FirebaseAuth
@@ -35,8 +36,83 @@ class FirestoreHelper (private val context: Context) {
                 }
             }
     }
+    // Add Type
+    fun addType(typeId: String, name: String, description: String,callback: FirestoreCallbackType) {
+        callback.onLoading(true)
+        // Check if Course Type already exists
+        val courseCollection = firestore
+            .collection("Types")
+            .whereEqualTo("name", name)
+        courseCollection.get().addOnCompleteListener { task ->
+            callback.onLoading(false)
+            if (task.isSuccessful) {
+                val documents = task.result
+                if (!documents.isEmpty) {
+                    // Course Type already exists
+                    Toast.makeText(context, "Course Type already exists", Toast.LENGTH_SHORT).show()
+                }else{
+                    try {
+                        // Add course details to Cloud Firestore
+                        val typeCollection = firestore.collection("Types")
+                        val typeCloud = hashMapOf(
+                            "id" to typeId,
+                            "name" to name,
+                            "description" to description
+                        )
+                        typeCollection.document(typeId).set(typeCloud)
+                            .addOnSuccessListener {
+                                // Added Successfully
+                                callback.onSuccess()
+                                Toast.makeText(context, "Type added successfully", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                callback.onFailure(e.message ?: "Unknown error")
+                            }
+                    } catch (e: Exception) {
+                        Log.e("addType", "Error inserting data", e)
+                    }
+                }
+            }else{
+                Toast.makeText(context, "Failed to check course type: ${task.exception?.message}",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    interface FirestoreCallbackType {
+        fun onLoading(isLoading: Boolean)
+        fun onSuccess()
+        fun onFailure(message: String)
+    }
+    // Get All Types
+    fun getAllType(firestoreCallback: (ArrayList<Types>) -> Unit) {
+        val typeList = ArrayList<Types>()
+        val typeCollection = firestore.collection("Types")
+        typeCollection.get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val typeId = document.getString("id") ?: ""
+                    val name = document.getString("name") ?: ""
+                    val description = document.getString("description") ?: ""
+                    val type = Types(typeId, name, description)
+                    typeList.add(type)
+                }
+                firestoreCallback(typeList)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("getAllTypes", "Error getting types", exception)
+                firestoreCallback(typeList)
+            }
+    }
+    // Get Type by name
+    fun getTypeByName(name: String, firestoreCallback: (ArrayList<Types>) -> Unit) {
+        val typeList = ArrayList<Types>()
+        val typeCollection = firestore.collection("Types")
+        typeCollection.whereEqualTo("name", name)
+            .get()
+        
+    }
     // Add Course
-    fun addCourse(courseId: String, type: String, description: String,callback: FirestoreCallback) {
+    fun addCourse(courseId: String,name: String, type: String, description: String,callback: FirestoreCallback) {
         callback.onLoading(true)
         // Check if Course Type already exists
         val courseCollection = firestore
@@ -55,6 +131,7 @@ class FirestoreHelper (private val context: Context) {
                         val courseCollection = firestore.collection("Courses")
                         val courseCloud = hashMapOf(
                             "id" to courseId,
+                            "name" to name,
                             "type" to type,
                             "description" to description
                         )
@@ -146,9 +223,10 @@ class FirestoreHelper (private val context: Context) {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val courseId = document.getString("id") ?: ""
+                    val name = document.getString("name") ?: ""
                     val type = document.getString("type") ?: ""
                     val description = document.getString("description") ?: ""
-                    val course = Courses(courseId, type, description)
+                    val course = Courses(courseId, name, type, description)
                     courseList.add(course)
                 }
                 firestoreCallback(courseList)
@@ -159,18 +237,19 @@ class FirestoreHelper (private val context: Context) {
             }
     }
     // Search Course by Type
-    fun searchCourseByType(type: String, firestoreCallback: (ArrayList<Courses>) -> Unit){
+    fun searchCourseByName(name: String, firestoreCallback: (ArrayList<Courses>) -> Unit){
         val courseList = ArrayList<Courses>()
         val courseCollection = firestore.collection("Courses")
-        courseCollection.whereGreaterThanOrEqualTo("type", type)
-            .whereLessThanOrEqualTo("type", type + "\uf8ff")
+        courseCollection.whereGreaterThanOrEqualTo("name", name)
+            .whereLessThanOrEqualTo("name", name + "\uf8ff")
             .get()
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val courseId = document.getString("id") ?: ""
+                    val name = document.getString("name") ?: ""
                     val type = document.getString("type") ?: ""
                     val description = document.getString("description") ?: ""
-                    val course = Courses(courseId, type, description)
+                    val course = Courses(courseId, name, type, description)
                     courseList.add(course)
                 }
                 firestoreCallback(courseList)
@@ -414,7 +493,7 @@ class FirestoreHelper (private val context: Context) {
     // Add Class
     fun addClass(classId: String, className: String, rank: String, quantity: String, price: String,
                  date: String, time: String, length: String, startDate: String, courseId: String,
-                 teacherId: String) {
+                 teacherId: String, jitsiMeetLink: String) {
         try {
             val classCollection = firestore
                 .collection("Courses")
@@ -432,7 +511,8 @@ class FirestoreHelper (private val context: Context) {
                 "length" to length,
                 "startDate" to startDate,
                 "courseId" to courseId,
-                "teacherId" to teacherId
+                "teacherId" to teacherId,
+                "jitsiMeetLink" to jitsiMeetLink
             )
             classCollection.document(classId).set(classCloud)
             // Generate and add timetable
@@ -540,7 +620,8 @@ class FirestoreHelper (private val context: Context) {
         }
     }
     // Update Timetable Title
-    fun updateTimetableTitle(classId: String, courseId: String, sessionId: String, newTitle: String) {
+    fun updateTimetableTitle(classId: String, courseId: String, sessionId: String,
+                             newTitle: String, jitsiMeetLink: String) {
         val timetableRef = firestore.collection("Courses")
             .document(courseId)
             .collection("Classes")
@@ -548,7 +629,12 @@ class FirestoreHelper (private val context: Context) {
             .collection("Timetable")
             .document(sessionId)
 
-        timetableRef.update("title", newTitle)
+        timetableRef.update(
+            mapOf(
+                "title" to newTitle,
+                "jitsiMeetLink" to jitsiMeetLink
+            )
+        )
             .addOnSuccessListener {
                 Log.d("Firestore", "Timetable title updated successfully.")
             }
@@ -613,8 +699,9 @@ class FirestoreHelper (private val context: Context) {
                     val dayOfWeek = document.getString("dayOfWeek") ?: ""
                     val title = document.getString("title") ?: ""
                     val status = document.getString("status") ?: ""
+                    val jitsiMeetLink = document.getString("jitsiMeetLink") ?: ""
                     val timetables = Timetable(sessionId, dateNumber, sessionNumber,
-                        date, dayOfWeek, title, status)
+                        date, dayOfWeek, title, status, jitsiMeetLink)
                     timetableList.add(timetables)
                 }
                 firestoreCallback(timetableList)
@@ -644,8 +731,9 @@ class FirestoreHelper (private val context: Context) {
                     val length = document.getString("length") ?: ""
                     val startDate = document.getString("startDate") ?: ""
                     val teacherId = document.getString("teacherId") ?: ""
+                    val jitsiMeetLink = document.getString("jitsiMeetLink") ?: ""
                     val classes = Classes(classId, className, rank, quantity, price, date, time,
-                        length, startDate, courseId, teacherId)
+                        length, startDate, courseId, teacherId, jitsiMeetLink)
                     classList.add(classes)
                 }
                 // Return the classList

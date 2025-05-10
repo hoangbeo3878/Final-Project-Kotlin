@@ -1,6 +1,5 @@
 package com.example.finalproject.timetables
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -42,34 +41,34 @@ class AddTitleMenu : AppCompatActivity() {
         super.onResume()
         val classId = intent.getStringExtra("classId") ?: ""
         val courseId = intent.getStringExtra("courseId") ?: ""
+        val jitsiMeetLink = intent.getStringExtra("jitsiMeetLink") ?: ""
         val fd = FirestoreHelper(this)
 
         fd.getTimetableByClassesId(classId, courseId) { timetable ->
             timetableList.clear()
+            timetable.forEach { session ->
+                session.jitsiMeetLink = jitsiMeetLink
+            }
             timetableList.addAll(timetable)
             adapter.notifyDataSetChanged()
         }
     }
 
-    // Hàm này sẽ cập nhật tất cả tiêu đề vào Firestore
     private fun updateAllTitles() {
         val classId = intent.getStringExtra("classId") ?: ""
         val courseId = intent.getStringExtra("courseId") ?: ""
+        val jitsiMeetLink = intent.getStringExtra("jitsiMeetLink") ?: ""
 
         val fd = FirestoreHelper(this)
 
-        // Lặp qua tất cả các buổi học trong timetableList và cập nhật tiêu đề vào Firestore
         for (timetable in timetableList) {
             val sessionId = timetable.sessionId
             val newTitle = timetable.title
-            // Cập nhật title cho từng buổi học trong Firestore
-            fd.updateTimetableTitle(classId, courseId, sessionId, newTitle)
+            fd.updateTimetableTitle(classId, courseId, sessionId, newTitle, jitsiMeetLink)
         }
 
-        // Thông báo đã cập nhật thành công
         Toast.makeText(this, "Titles updated successfully", Toast.LENGTH_SHORT).show()
 
-        // Quay lại màn hình trước hoặc thông báo cho người dùng nếu cần
-        finish() // Hoặc bạn có thể thêm hành động khác
+        finish()
     }
 }

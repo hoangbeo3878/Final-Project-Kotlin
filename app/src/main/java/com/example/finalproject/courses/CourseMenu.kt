@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.DatabaseHelper
 import com.example.finalproject.FirestoreHelper
 import com.example.finalproject.R
+import com.example.finalproject.type.TypeMenu
 import com.example.finalproject.users.UserMenu
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -41,7 +42,7 @@ class CourseMenu : AppCompatActivity() {
                 courseList.clear()
                 if (query.isNotEmpty()) {
                     // Perform search when there's input
-                    fd.searchCourseByType(query) { courses ->
+                    fd.searchCourseByName(query) { courses ->
                         courseList.clear()
                         courseList.addAll(courses)
                         adapter.notifyDataSetChanged()
@@ -70,7 +71,7 @@ class CourseMenu : AppCompatActivity() {
         bottomNavigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.stats -> {
-//                    startActivity(Intent(this, StatsActivity::class.java))
+                    startActivity(Intent(this, TypeMenu::class.java))
                     true
                 }
                 R.id.courses -> {

@@ -7,5 +7,6 @@ data class Timetable (
     val date: String,
     val dayOfWeek: String,
     var title: String,
-    val status: String
+    val status: String,
+    var jitsiMeetLink: String = ""
 )

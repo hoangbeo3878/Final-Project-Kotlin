@@ -489,32 +489,32 @@ class DatabaseHelper (private val context: Context) :
         return null
     }
     // Get Classes by Course
-    fun getClassesByCourseId(courseId: String): ArrayList<Classes> {
-        val classList = ArrayList<Classes>()
-        val db = this.readableDatabase
-        val selectQuery = "SELECT * FROM $TABLE_CLASSES WHERE $COLUMN_CLASS_COURSE_ID = ?"
-        val cursor = db.rawQuery(selectQuery, arrayOf(courseId))
-        if (cursor.moveToFirst()) {
-            do {
-                val classes = Classes(
-                    id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_ID)),
-                    name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_NAME)),
-                    rank = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_RANK)),
-                    quantity = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_QUANTITY)),
-                    price = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_PRICE)),
-                    date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_DATE)),
-                    time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_TIME)),
-                    length = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_LENGTH)),
-                    startDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_START_DATE)),
-                    courseId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_COURSE_ID)),
-                    teacherId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_TEACHER_ID))
-                )
-                classList.add(classes)
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        db.close()
-        return classList
-    }
+//    fun getClassesByCourseId(courseId: String): ArrayList<Classes> {
+//        val classList = ArrayList<Classes>()
+//        val db = this.readableDatabase
+//        val selectQuery = "SELECT * FROM $TABLE_CLASSES WHERE $COLUMN_CLASS_COURSE_ID = ?"
+//        val cursor = db.rawQuery(selectQuery, arrayOf(courseId))
+//        if (cursor.moveToFirst()) {
+//            do {
+//                val classes = Classes(
+//                    id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_ID)),
+//                    name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_NAME)),
+//                    rank = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_RANK)),
+//                    quantity = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_QUANTITY)),
+//                    price = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_PRICE)),
+//                    date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_DATE)),
+//                    time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_TIME)),
+//                    length = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_LENGTH)),
+//                    startDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_START_DATE)),
+//                    courseId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_COURSE_ID)),
+//                    teacherId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLASS_TEACHER_ID))
+//                )
+//                classList.add(classes)
+//            } while (cursor.moveToNext())
+//        }
+//        cursor.close()
+//        db.close()
+//        return classList
+//    }
 }
 

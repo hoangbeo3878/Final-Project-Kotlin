@@ -20,14 +20,14 @@
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="EDIT COURSE"
+        android:text="EDIT TYPE"
         android:textSize="32sp"
         android:textStyle="bold"
         android:textColor="@color/white"
         android:layout_marginTop="16dp"
         android:layout_gravity="center" />
 
-    <!-- Course Type Field (Read-only) -->
+    <!-- Course Type Field -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,29 +35,10 @@
         app:hintTextColor="@color/black">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/courseNameEditText"
+            android:id="@+id/TypeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Course Name"
-            android:textColorHint="@color/black"
-            android:inputType="text"
-            android:editable="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- Course Type Field (Read-only) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        app:hintTextColor="@color/black">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/courseTypeEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Course Type"
+            android:hint="Type Name"
             android:textColorHint="@color/black"
             android:inputType="text"
             android:editable="false"
@@ -73,10 +54,10 @@
         app:hintTextColor="@color/black">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/courseDescription"
+            android:id="@+id/DescriptionEditText"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:hint="Course Description"
+            android:hint="Type Description"
             android:textColorHint="@color/black"
             android:gravity="top|start"
             android:inputType="textMultiLine" />
@@ -84,7 +65,7 @@
 
     <!-- Add Course Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/updateCourseButton"
+        android:id="@+id/addTypeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SUBMIT EDITED"
