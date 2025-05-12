@@ -3,7 +3,6 @@ package com.example.finalproject.classes
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -74,19 +73,14 @@ class AddClass : AppCompatActivity() {
         addCourseButton.setOnClickListener {
             val spinners = listOf(classRankSpinner, classQuantitySpinner, classPriceSpinner,
                 classTimeSpinner, classDateSpinner, classTeacherSpinner)
-            val spinnerSelected = spinners.all { it.selectedItemPosition != 0 }
+            val spinnerSelected = spinners.any { it.selectedItemPosition != 0 }
 
             if (spinnerSelected && classStartDate.text.isNotEmpty()) {
                 val time = classTimeSpinner.selectedItem.toString()
                 val date = classDateSpinner.selectedItem.toString()
                 val startDate = classStartDate.text.toString()
                 val length = classLengthSpinner.selectedItem.toString()
-                val teacherId = teacherIds.getOrNull(classTeacherSpinner.selectedItemPosition - 1) ?: ""
-
-                if (teacherId.isEmpty()) {
-                    Toast.makeText(this@AddClass, "Please select a valid teacher", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
+                val teacherId = teacherIds[classTeacherSpinner.selectedItemPosition - 1]
 
                 checkTeacherClass(teacherId, date, time, startDate, length) { available ->
                     if (available) {
@@ -109,7 +103,8 @@ class AddClass : AppCompatActivity() {
 
                         // Create Jitsi Meet link for class
                         val jitsiMeetLink = "https://meet.jit.si/$id"
-
+                        // Status
+                        val status = "Upcoming"
                         // Get class number from firestore
                         val db = FirebaseFirestore.getInstance()
                         db.collection("Courses")
@@ -127,7 +122,7 @@ class AddClass : AppCompatActivity() {
                                 }
                                 val fd = FirestoreHelper(this)
                                 fd.addClass(id, name, rank, quantity, price, date,
-                                    time, length, startDate, courseId, teacherId, jitsiMeetLink)
+                                    time, length, startDate, courseId, teacherId, jitsiMeetLink, status)
                                 // Move to Add Title
                                 val intent = Intent(this, AddTitleMenu::class.java)
                                 intent.putExtra("classId", id)
@@ -223,77 +218,97 @@ class AddClass : AppCompatActivity() {
         return validClassDays.contains(classDayName)
     }
     // Check if Teacher did not has same class on same time on the same date
-    private fun checkTeacherClass(
-        teacherId: String,
-        date: String,
-        time: String,
-        startDate: String,
-        length: String,
-        callback: (Boolean) -> Unit
-    ) {
+    private fun checkTeacherClass(teacherId: String, date: String, time: String,
+                                  startDate: String, length: String, callback: (Boolean) -> Unit) {
         val db = FirebaseFirestore.getInstance()
-        val newClassDates = generateClassDates(date, startDate, length)
 
-        db.collectionGroup("Classes") // Truy vấn tất cả subcollection Classes trong Courses
-            .whereEqualTo("teacherId", teacherId)
-            .whereEqualTo("time", time)
+        // Get all classes of this teacher
+        db.collection("Courses")
             .get()
-            .addOnSuccessListener { classes ->
-                for (classDoc in classes) {
-                    val courseId = classDoc.reference.parent.parent?.id ?: ""
+            .addOnSuccessListener { courses ->
+                var conflictFound = false
+                var coursesChecked = 0
+
+                if (courses.isEmpty) {
+                    callback(true)
+                    return@addOnSuccessListener
+                }
+                for (course in courses) {
                     db.collection("Courses")
-                        .document(courseId)
+                        .document(course.id)
                         .collection("Classes")
-                        .document(classDoc.id)
-                        .collection("Timetable")
+                        .whereEqualTo("teacherId", teacherId)
+                        .whereEqualTo("time", time)
                         .get()
-                        .addOnSuccessListener { timetable ->
-                            for (session in timetable) {
-                                val existingDate = session.getString("date") ?: continue
-                                if (newClassDates.contains(existingDate)) {
-                                    callback(false) // Có xung đột
-                                    return@addOnSuccessListener
-                                }
+                        .addOnSuccessListener { classes ->
+                            coursesChecked++
+
+                            for (classDoc in classes) {
+                                // Get the timetable for each class
+                                db.collection("Courses")
+                                    .document(course.id)
+                                    .collection("Classes")
+                                    .document(classDoc.id)
+                                    .collection("Timetable")
+                                    .get()
+                                    .addOnSuccessListener { timetable ->
+                                        // Convert our new class dates to Date objects for comparison
+                                        val newClassDates = generateClassDates(date, startDate, length)
+
+                                        // Check each session in the existing timetable
+                                        for (session in timetable) {
+                                            val existingDate = session.getString("date") ?: continue
+
+                                            // Check if this date conflicts with any of our new class dates
+                                            if (newClassDates.contains(existingDate)) {
+                                                conflictFound = true
+                                                callback(false)
+                                                return@addOnSuccessListener
+                                            }
+                                        }
+
+                                        // If we've checked all courses and found no conflicts
+                                        if (coursesChecked == courses.size() && !conflictFound) {
+                                            callback(true)
+                                        }
+                                    }
+                                    .addOnFailureListener {
+                                        callback(false)
+                                    }
                             }
-                            callback(true) // Không có xung đột
+
+                            // If no classes found for this course
+                            if (classes.isEmpty && coursesChecked == courses.size() && !conflictFound) {
+                                callback(true)
+                            }
                         }
                         .addOnFailureListener {
-                            callback(false) // Lỗi, coi như có xung đột
+                            callback(false)
                         }
                 }
-                if (classes.isEmpty) callback(true) // Không có lớp nào, không có xung đột
             }
             .addOnFailureListener {
-                callback(false) // Lỗi tổng quát
+                callback(false)
             }
     }
     // Generate Class Dates
     private fun generateClassDates(datePattern: String, startDate: String, length: String): Set<String> {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val calendar = Calendar.getInstance().apply {
-            time = dateFormat.parse(startDate) ?: run {
-                Log.e("generateClassDates", "Invalid startDate format: $startDate")
-                return emptySet()
-            }
-        }
+        val calendar = Calendar.getInstance()
+        calendar.time = dateFormat.parse(startDate) ?: return emptySet()
 
-        val totalSessionsNeeded = length.split(" ")[0].toIntOrNull() ?: run {
-            Log.e("generateClassDates", "Invalid length format: $length")
-            return emptySet()
-        }
+        val totalSessionsNeeded = length.split(" ")[0].toIntOrNull() ?: return emptySet()
 
         val classDays = when (datePattern) {
             "Monday - Wednesday - Friday" -> listOf(Calendar.MONDAY, Calendar.WEDNESDAY, Calendar.FRIDAY)
             "Tuesday - Thursday - Saturday" -> listOf(Calendar.TUESDAY, Calendar.THURSDAY, Calendar.SATURDAY)
             "Saturday - Sunday" -> listOf(Calendar.SATURDAY, Calendar.SUNDAY)
-            else -> {
-                Log.e("generateClassDates", "Invalid datePattern: $datePattern")
-                return emptySet()
-            }
+            else -> return emptySet()
         }
 
         val dates = mutableSetOf<String>()
         var sessionsCreated = 0
+
         while (sessionsCreated < totalSessionsNeeded) {
             if (calendar.get(Calendar.DAY_OF_WEEK) in classDays) {
                 dates.add(dateFormat.format(calendar.time))

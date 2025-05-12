@@ -9,48 +9,80 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.FirestoreHelper
 import com.example.finalproject.R
+import com.example.finalproject.courses.CourseMenu
 import com.example.finalproject.timetables.TimetableMenu
 
-class ClassAdapter (private val context: Context, private val classList: ArrayList<Classes>)
-                    : RecyclerView.Adapter<ClassAdapter.ClassViewHolder>() {
+class ClassAdapter(private val context: Context, private val classList: ArrayList<Classes>) :
+    RecyclerView.Adapter<ClassAdapter.ClassViewHolder>() {
 
     class ClassViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val className: TextView = itemView.findViewById(R.id.className)
         val classTeacher: TextView = itemView.findViewById(R.id.classTeacher)
         val classQuantity: TextView = itemView.findViewById(R.id.classQuantity)
+        val classStatus: TextView = itemView.findViewById(R.id.classStatus)
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClassAdapter.ClassViewHolder {
+
+    // Filter out Canceled classes
+    private val filteredClassList: List<Classes>
+        get() = classList.filter { it.status != "Canceled" }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClassViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.class_card, parent, false)
         return ClassViewHolder(itemView)
     }
+
     override fun onBindViewHolder(holder: ClassViewHolder, position: Int) {
-        val currentClass = classList[position]
-        holder.className.text = "Class: " + currentClass.name
+        val currentClass = filteredClassList[position]
+        holder.className.text = "Class: ${currentClass.name}"
+
         val fb = FirestoreHelper(context)
+        // Get teacher name
         fb.getTeacherById(currentClass.teacherId) { teacher ->
             if (teacher != null) {
-                holder.classTeacher.text = "Teacher: " + teacher.name
+                holder.classTeacher.text = "Teacher: ${teacher.name}"
             } else {
                 Toast.makeText(context, "Teacher not found", Toast.LENGTH_SHORT).show()
             }
         }
-        holder.classQuantity.text = "Quantity: " + currentClass.quantity
+        holder.classQuantity.text = "Quantity: ${currentClass.quantity}"
+        holder.classStatus.text = "Status: ${currentClass.status}"
+        // Update Class status based on Timetable
+        fb.updateClassStatus(currentClass.courseId, currentClass.id) { success ->
+            if (!success) {
+                Log.w("ClassAdapter", "Failed to update status for Class ${currentClass.id}")
+            } else {
+                // Update the local classList with the new status
+                val classIndex = classList.indexOfFirst { it.id == currentClass.id }
+                if (classIndex != -1) {
+                    val updatedClass = classList[classIndex].copy(
+                        status = if (currentClass.status == "Canceled") "Canceled" else {
+                            currentClass.status
+                        }
+                    )
+                    classList[classIndex] = updatedClass
+                    notifyDataSetChanged()
+                }
+            }
+        }
+
         // Show Dialog Options
         holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
             val dialog = Dialog(context)
             dialog.setContentView(R.layout.class_options)
             dialog.setTitle("Choose an Action")
+
             // Dialog Buttons
             val editButton = dialog.findViewById<TextView>(R.id.edit_button)
-            val deleteButton = dialog.findViewById<TextView>(R.id.delete_button)
+            val cancelButton = dialog.findViewById<TextView>(R.id.cancle_button)
             val showTimetableButton = dialog.findViewById<TextView>(R.id.show_button)
+
             // Edit Button
             editButton.setOnClickListener {
-                val intent = Intent(holder.itemView.context, EditClass::class.java)
+                val intent = Intent(context, EditClass::class.java)
                 intent.putExtra("classId", currentClass.id)
                 intent.putExtra("className", currentClass.name)
                 intent.putExtra("classQuantity", currentClass.quantity)
@@ -62,36 +94,51 @@ class ClassAdapter (private val context: Context, private val classList: ArrayLi
                 intent.putExtra("classLength", currentClass.length)
                 intent.putExtra("teacherId", currentClass.teacherId)
                 intent.putExtra("courseId", currentClass.courseId)
-                Log.d("ClassAdapter", "Class ID: ${currentClass.id}")
-                Log.d("ClassAdapter", "Course ID: ${currentClass.courseId}")
-                Log.d("ClassAdapter", "Teacher ID: ${currentClass.teacherId}")
-                Log.d("ClassAdapter", "Class Name: ${currentClass.name}")
-                Log.d("ClassAdapter", "Class Quantity: ${currentClass.quantity}")
-                Log.d("ClassAdapter", "Class Day: ${currentClass.date}")
-                Log.d("ClassAdapter", "Class Time: ${currentClass.time}")
-                Log.d("ClassAdapter", "Class Rank: ${currentClass.rank}")
-                Log.d("ClassAdapter", "Class Start Date: ${currentClass.startDate}")
-                Log.d("ClassAdapter", "Class Price: ${currentClass.price}")
-                Log.d("ClassAdapter", "Class Length: ${currentClass.length}")
-                holder.itemView.context.startActivity(intent)
+                context.startActivity(intent)
                 dialog.dismiss()
             }
-            // Delete Button
-            deleteButton.setOnClickListener {
-                ////
+            // Cancel Class Button with Confirmation Dialog
+            cancelButton.setOnClickListener {
+                val confirmDialog = AlertDialog.Builder(context)
+                confirmDialog.setTitle("Confirm Cancellation")
+                confirmDialog.setMessage("Are you sure you want to cancel this class ?")
+                confirmDialog.setPositiveButton("Yes") { _, _ ->
+                    fb.cancelClass(currentClass.courseId, currentClass.id, context) { success ->
+                        if (success) {
+                            val classIndex = classList.indexOfFirst { it.id == currentClass.id }
+                            if (classIndex != -1) {
+                                classList[classIndex] = classList[classIndex].copy(status = "Canceled")
+                                val intent = Intent(context, CourseMenu::class.java)
+                                context.startActivity(intent)
+                                notifyDataSetChanged()
+                            }
+                        } else {
+                            Toast.makeText(context,
+                                "Failed to cancel class", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                confirmDialog.setNegativeButton("No") { _, _ ->
+                    // Do nothing
+                }
+                confirmDialog.show()
             }
+
             // Show Timetable Button
             showTimetableButton.setOnClickListener {
-                val intent = Intent(holder.itemView.context, TimetableMenu::class.java)
+                val intent = Intent(context, TimetableMenu::class.java)
                 intent.putExtra("classId", currentClass.id)
                 intent.putExtra("courseId", currentClass.courseId)
-                holder.itemView.context.startActivity(intent)
+                context.startActivity(intent)
                 dialog.dismiss()
             }
+
             dialog.show()
         }
     }
+
     override fun getItemCount(): Int {
-        return classList.size
+        return filteredClassList.size
     }
 }

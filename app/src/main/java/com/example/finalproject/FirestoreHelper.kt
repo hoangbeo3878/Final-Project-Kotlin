@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import com.example.finalproject.classes.ClassMenu
 import com.example.finalproject.classes.Classes
 import com.example.finalproject.timetables.Timetable
 import com.example.finalproject.courses.CourseMenu
@@ -21,7 +22,7 @@ import java.util.Date
 import java.util.Locale
 
 class FirestoreHelper (private val context: Context) {
-    private val firestore = FirebaseFirestore.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
     // Sign-in with Firebase Authentication
     fun loginWithFirebase(email: String, password: String){
         val auth = FirebaseAuth.getInstance()
@@ -82,6 +83,23 @@ class FirestoreHelper (private val context: Context) {
         fun onLoading(isLoading: Boolean)
         fun onSuccess()
         fun onFailure(message: String)
+    }
+    // Update Type
+    fun updateType(typeId: String, name: String, description: String) {
+        try {
+            // Update course details in Cloud Firestore
+            val typeCollection = firestore.collection("Types")
+            val typeCloud = hashMapOf(
+                "id" to typeId,
+                "name" to name,
+                "description" to description
+                )
+            typeCollection.document(typeId).set(typeCloud)
+            // Updated Successfully
+            Toast.makeText(context,"Type updated successfully", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context,"Error updating type: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     // Get All Types
     fun getAllType(firestoreCallback: (ArrayList<Types>) -> Unit) {
@@ -160,12 +178,13 @@ class FirestoreHelper (private val context: Context) {
         fun onFailure(message: String)
     }
     // Update Course
-    fun updateCourse(courseId: String, type: String, description: String) {
+    fun updateCourse(courseId: String, name: String, type: String, description: String) {
         try {
             // Update course details in Cloud Firestore
             val courseCollection = firestore.collection("Courses")
             val courseCloud = hashMapOf(
                 "id" to courseId,
+                "name" to name,
                 "type" to type,
                 "description" to description
             )
@@ -493,7 +512,7 @@ class FirestoreHelper (private val context: Context) {
     // Add Class
     fun addClass(classId: String, className: String, rank: String, quantity: String, price: String,
                  date: String, time: String, length: String, startDate: String, courseId: String,
-                 teacherId: String, jitsiMeetLink: String) {
+                 teacherId: String, jitsiMeetLink: String, status: String) {
         try {
             val classCollection = firestore
                 .collection("Courses")
@@ -512,7 +531,8 @@ class FirestoreHelper (private val context: Context) {
                 "startDate" to startDate,
                 "courseId" to courseId,
                 "teacherId" to teacherId,
-                "jitsiMeetLink" to jitsiMeetLink
+                "jitsiMeetLink" to jitsiMeetLink,
+                "status" to status
             )
             classCollection.document(classId).set(classCloud)
             // Generate and add timetable
@@ -560,6 +580,130 @@ class FirestoreHelper (private val context: Context) {
         }finally {
             val intent = Intent(context, CourseMenu::class.java)
             context.startActivity(intent)
+        }
+    }
+    // Update Class Status
+    fun updateClassStatus(courseId: String, classId: String, onComplete: (Boolean) -> Unit) {
+        val classRef = firestore
+            .collection("Courses")
+            .document(courseId)
+            .collection("Classes")
+            .document(classId)
+        val timetableCollection = classRef.collection("Timetable")
+        // Get current date
+        val currentDate = Calendar.getInstance().time
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        // Fetch current status and startDate
+        classRef.get().addOnSuccessListener { classSnapshot ->
+            val currentStatus = classSnapshot.getString("status") ?: "Unknown"
+            if (currentStatus == "Canceled") {
+                onComplete(true)
+                return@addOnSuccessListener
+            }
+            val startDateStr = classSnapshot.getString("startDate") ?: ""
+            val startDate = dateFormat.parse(startDateStr)
+
+            if (startDate == null) {
+                onComplete(false)
+                return@addOnSuccessListener
+            }
+            timetableCollection.get().addOnSuccessListener { sessions ->
+                if (sessions.isEmpty) {
+                    // If no sessions, status depends on startDate
+                    val newStatus = if (currentDate.before(startDate)) "Upcoming" else "Ongoing"
+                    classRef.update("status", newStatus)
+                        .addOnSuccessListener {
+                            onComplete(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(context,
+                                "Error updating class status: ${e.message}", Toast.LENGTH_SHORT).show()
+                            onComplete(false)
+                        }
+                    return@addOnSuccessListener
+                }
+                // Check session statuses
+                var allCompleted = true
+                var hasOngoing = false
+                for (session in sessions) {
+                    val sessionStatus = session.getString("status") ?: "Unknown"
+                    val sessionDateStr = session.getString("date") ?: ""
+                    val sessionDate = dateFormat.parse(sessionDateStr)
+
+                    if (sessionStatus != "Completed") {
+                        allCompleted = false
+                        if (sessionDate != null && !currentDate.before(sessionDate) && currentDate.after(sessionDate)) {
+                            hasOngoing = true
+                        }
+                    }
+                }
+                // Determine new status
+                val newStatus = when {
+                    allCompleted -> "Completed"
+                    hasOngoing || (currentDate.after(startDate) && !allCompleted) -> "Ongoing"
+                    currentDate.before(startDate) -> "Upcoming"
+                    else -> "Ongoing"
+                }
+                classRef.update("status", newStatus)
+                    .addOnSuccessListener {
+                        onComplete(true)
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context,
+                            "Error updating class status: ${e.message}", Toast.LENGTH_SHORT).show()
+                        onComplete(false)
+                    }
+            }.addOnFailureListener { e ->
+                Toast.makeText(context,
+                    "Error checking timetable: ${e.message}", Toast.LENGTH_SHORT).show()
+                onComplete(false)
+            }
+        }.addOnFailureListener { e ->
+            Toast.makeText(context,
+                "Error fetching class: ${e.message}", Toast.LENGTH_SHORT).show()
+            onComplete(false)
+        }
+    }
+    // Cancel Class
+    // Trong FirestoreHelper.kt
+    fun cancelClass(courseId: String, classId: String, context: Context, callback: (Boolean) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        try {
+            db.collection("Courses")
+                .document(courseId)
+                .collection("Classes")
+                .document(classId)
+                .update("status", "Canceled")
+                .addOnSuccessListener {
+                    db.collection("Courses")
+                        .document(courseId)
+                        .collection("Classes")
+                        .document(classId)
+                        .collection("Timetable")
+                        .get()
+                        .addOnSuccessListener { timetableDocs ->
+                            for (doc in timetableDocs) {
+                                doc.reference.delete()
+                            }
+                            Toast.makeText(context,
+                                "Class canceled and timetable cleared", Toast.LENGTH_SHORT).show()
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(context,
+                                "Error clearing timetable: ${e.message}", Toast.LENGTH_SHORT).show()
+                            callback(false)
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context,
+                        "Error canceling class: ${e.message}", Toast.LENGTH_SHORT).show()
+                    callback(false)
+                }
+        } catch (e: Exception) {
+            Toast.makeText(context,
+                "Error canceling class: ${e.message}", Toast.LENGTH_SHORT).show()
+            callback(false)
         }
     }
     // Generate Timetable
@@ -680,8 +824,7 @@ class FirestoreHelper (private val context: Context) {
         }
     }
     // Get Timetable by Classes Id
-    fun getTimetableByClassesId(classId: String, courseId: String,
-                                firestoreCallback: (ArrayList<Timetable>) -> Unit) {
+    fun getTimetableByClassesId(classId: String, courseId: String, firestoreCallback: (ArrayList<Timetable>) -> Unit) {
         val timetableList = ArrayList<Timetable>()
         val timetableCollection = firestore
             .collection("Courses")
@@ -689,9 +832,15 @@ class FirestoreHelper (private val context: Context) {
             .collection("Classes")
             .document(classId)
             .collection("Timetable")
-        timetableCollection.get()
-            .addOnSuccessListener {
-                for (document in it) {
+        timetableCollection.addSnapshotListener { snapshot, exception ->
+            if (exception != null) {
+                Log.e("getTimetableByClassesId", "Error getting timetable", exception)
+                firestoreCallback(timetableList)
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                timetableList.clear()
+                for (document in snapshot) {
                     val sessionId = document.getString("sessionId") ?: ""
                     val dateNumber = document.getLong("dateNumber")?.toInt()?.toString() ?: ""
                     val sessionNumber = document.getLong("sessionNumber")?.toInt()?.toString() ?: ""
@@ -700,16 +849,12 @@ class FirestoreHelper (private val context: Context) {
                     val title = document.getString("title") ?: ""
                     val status = document.getString("status") ?: ""
                     val jitsiMeetLink = document.getString("jitsiMeetLink") ?: ""
-                    val timetables = Timetable(sessionId, dateNumber, sessionNumber,
-                        date, dayOfWeek, title, status, jitsiMeetLink)
-                    timetableList.add(timetables)
+                    val timetable = Timetable(sessionId, dateNumber, sessionNumber, date, dayOfWeek, title, status, jitsiMeetLink)
+                    timetableList.add(timetable)
                 }
                 firestoreCallback(timetableList)
             }
-            .addOnFailureListener { exception ->
-                Log.e("getTimetableByClassesId", "Error getting timetable", exception)
-                firestoreCallback(timetableList)
-            }
+        }
     }
     // Get Classes by CourseId
     fun getClassesByCourseId(courseId: String, firestoreCallback: (ArrayList<Classes>) -> Unit) {
@@ -732,8 +877,9 @@ class FirestoreHelper (private val context: Context) {
                     val startDate = document.getString("startDate") ?: ""
                     val teacherId = document.getString("teacherId") ?: ""
                     val jitsiMeetLink = document.getString("jitsiMeetLink") ?: ""
+                    val status = document.getString("status") ?: ""
                     val classes = Classes(classId, className, rank, quantity, price, date, time,
-                        length, startDate, courseId, teacherId, jitsiMeetLink)
+                        length, startDate, courseId, teacherId, jitsiMeetLink, status)
                     classList.add(classes)
                 }
                 // Return the classList

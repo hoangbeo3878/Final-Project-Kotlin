@@ -22,10 +22,10 @@
         android:background="@color/black" />
 
     <TextView
-        android:id="@+id/delete_button"
+        android:id="@+id/cancle_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Delete Class"
+        android:text="Cancle Class"
         android:padding="12dp"
         android:gravity="center"
         android:background="?attr/selectableItemBackground"

@@ -12,5 +12,6 @@ data class Classes (
     val startDate: String,
     val courseId: String,
     val teacherId: String,
-    val jitsiMeetLink: String
+    val jitsiMeetLink: String,
+    val status: String
 )

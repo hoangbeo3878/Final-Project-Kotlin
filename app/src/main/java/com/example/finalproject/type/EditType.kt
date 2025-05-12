@@ -16,10 +16,10 @@ class EditType : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_edit_type)
         // Initialize views
-        val courseTypeEditText = findViewById<EditText>(R.id.TypeEditText)
-        val courseDescriptionEditText = findViewById<EditText>(R.id.DescriptionEditText)
+        val typeNameEditText = findViewById<EditText>(R.id.typeNameEditText)
+        val typeDescriptionEditText = findViewById<EditText>(R.id.typeDescriptionEditText)
         val backButton = findViewById<ImageView>(R.id.backButton)
-        val updateCourseButton = findViewById<Button>(R.id.addTypeButton)
+        val editTypeButton = findViewById<Button>(R.id.editTypeButton)
 
         // Back Button
         backButton.setOnClickListener {
@@ -27,25 +27,24 @@ class EditType : AppCompatActivity() {
             startActivity(intent)
         }
         // Update Button
-        updateCourseButton.setOnClickListener {
+        editTypeButton.setOnClickListener {
             val id = intent.getStringExtra("id") ?: ""
-            val type = courseTypeEditText.text.toString()
-            val description = courseDescriptionEditText.text.toString()
+            val name = typeNameEditText.text.toString()
+            val description = typeDescriptionEditText.text.toString()
             val fd = FirestoreHelper(this)
-            fd.updateCourse(id, type, description)
+            fd.updateType(id, name, description)
         }
         getIntentData()
     }
     // Getting Intent Data
     private fun getIntentData(){
         //Getting Data from Intent
-        val id = intent.getStringExtra("id")
         val name = intent.getStringExtra("name")
         val description = intent.getStringExtra("description")
         //Setting Intent Data
-        val courseTypeEditText = findViewById<EditText>(R.id.TypeEditText)
-        val courseDescriptionEditText = findViewById<EditText>(R.id.DescriptionEditText)
-        courseTypeEditText.setText(name)
-        courseDescriptionEditText.setText(description)
+        val typeNameEditText = findViewById<EditText>(R.id.typeNameEditText)
+        val typeDescriptionEditText = findViewById<EditText>(R.id.typeDescriptionEditText)
+        typeNameEditText.setText(name)
+        typeDescriptionEditText.setText(description)
     }
 }

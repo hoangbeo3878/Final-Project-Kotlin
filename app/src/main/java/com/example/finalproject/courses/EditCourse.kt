@@ -32,18 +32,18 @@ class EditCourse : AppCompatActivity() {
         // Update Button
         updateCourseButton.setOnClickListener {
             val id = intent.getStringExtra("id") ?: ""
-            val name = courseTypeEditText.text.toString()
+            val name = courseNameEditText.text.toString()
+            val type = courseTypeEditText.text.toString()
             val description = courseDescriptionEditText.text.toString()
             val fd = FirestoreHelper(this)
-            fd.updateCourse(id, name, description)
+            fd.updateCourse(id, name, type, description)
         }
         getIntentData()
     }
     // Getting Intent Data
     private fun getIntentData(){
         //Getting Data from Intent
-        val id = intent.getStringExtra("id")
-        val title = intent.getStringExtra("title")
+        val name = intent.getStringExtra("name")
         val type = intent.getStringExtra("type")
         val description = intent.getStringExtra("description")
         //Setting Intent Data
@@ -51,7 +51,7 @@ class EditCourse : AppCompatActivity() {
         val courseNameEditText = findViewById<EditText>(R.id.courseNameEditText)
         val courseDescriptionEditText = findViewById<EditText>(R.id.courseDescription)
         courseTypeEditText.setText(type)
-        courseNameEditText.setText(title)
+        courseNameEditText.setText(name)
         courseDescriptionEditText.setText(description)
     }
 }

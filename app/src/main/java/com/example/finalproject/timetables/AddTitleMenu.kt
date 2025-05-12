@@ -1,5 +1,6 @@
 package com.example.finalproject.timetables
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.FirestoreHelper
 import com.example.finalproject.R
+import com.example.finalproject.classes.ClassMenu
 
 
 class AddTitleMenu : AppCompatActivity() {
@@ -66,9 +68,9 @@ class AddTitleMenu : AppCompatActivity() {
             val newTitle = timetable.title
             fd.updateTimetableTitle(classId, courseId, sessionId, newTitle, jitsiMeetLink)
         }
-
         Toast.makeText(this, "Titles updated successfully", Toast.LENGTH_SHORT).show()
-
-        finish()
+        val intent = Intent(this, ClassMenu::class.java)
+        intent.putExtra("courseId", courseId)
+        this.startActivity(intent)
     }
 }

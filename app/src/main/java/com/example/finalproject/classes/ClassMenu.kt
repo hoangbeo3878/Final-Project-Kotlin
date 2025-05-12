@@ -3,6 +3,7 @@ package com.example.finalproject.classes
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -30,32 +31,17 @@ class ClassMenu : AppCompatActivity() {
         setContentView(R.layout.activity_class_menu)
         // Initialize
         val searchInput = findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.search_input)
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        // Back button click listener
+        val backButton = findViewById<ImageView>(R.id.backButton)
+        backButton.setOnClickListener {
+            val intent = Intent(this, CourseMenu::class.java)
+            startActivity(intent)
+        }
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        // Set selected item in BottomNavigationView
-        bottomNavigation.selectedItemId = R.id.courses
         // Setup RecyclerView with LayoutManager and Adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ClassAdapter(this, classList)
         recyclerView.adapter = adapter
-        // Set up BottomNavigationView item selection listener
-        bottomNavigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.stats -> {
-//                    startActivity(Intent(this, StatsActivity::class.java))
-                    true
-                }
-                R.id.courses -> {
-                    startActivity(Intent(this, CourseMenu::class.java))
-                    true
-                }
-                R.id.users -> {
-                    startActivity(Intent(this, UserMenu::class.java))
-                    true
-                }
-                else -> false
-            }
-        }
     }
     // Update RecyclerView when the activity is resumed
     override fun onResume() {

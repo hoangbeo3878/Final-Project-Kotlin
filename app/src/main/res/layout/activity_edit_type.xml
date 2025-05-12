@@ -35,7 +35,7 @@
         app:hintTextColor="@color/black">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TypeEditText"
+            android:id="@+id/typeNameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Type Name"
@@ -54,7 +54,7 @@
         app:hintTextColor="@color/black">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/DescriptionEditText"
+            android:id="@+id/typeDescriptionEditText"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:hint="Type Description"
@@ -65,7 +65,7 @@
 
     <!-- Add Course Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/addTypeButton"
+        android:id="@+id/editTypeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SUBMIT EDITED"
